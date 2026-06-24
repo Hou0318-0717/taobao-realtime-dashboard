@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>实时分析 Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+<body>
+<h2>Spark+Kafka 实时分析 Dashboard</h2>
+<div style="margin:10px 0;">
+    <b>女生购物人数: </b><b id="girl">0</b>&emsp;
+    <b>男生购物人数: </b><b id="boy">0</b>
+</div>
+<div id="container" style="width:100%;height:500px;"></div>
+
+<script>
+var chart = echarts.init(document.getElementById('container'));
+var option = {
+    title: { text: '男女生购物人数实时分析', left: 'center' },
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['女生购物人数', '男生购物人数'], top: 30 },
+    xAxis: { type: 'time', name: '时间' },
+    yAxis: { type: 'value', name: '人数' },
+    series: [{
+        name: '女生购物人数', type: 'line', smooth: true, data: []
+    }, {
+        name: '男生购物人数', type: 'line', smooth: true, data: []
+    }]
+};
+chart.setOption(option);
+
+var girlData = [];
+var boyData = [];
+
+function fetchData() {
+    fetch('/api/data')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var girl = data.girl || 0;
+            var boy = data.boy || 0;
+            var now = new Date().getTime();
+            document.getElementById('girl').textContent = girl;
+            document.getElementById('boy').textContent = boy;
+            girlData.push([now, girl]);
+            boyData.push([now, boy]);
+            if (girlData.length > 30) { girlData.shift(); boyData.shift(); }
+            chart.setOption({
+                series: [
+                    { data: girlData },
+                    { data: boyData }
+                ]
+            });
+        });
+}
+
+setInterval(fetchData, 1000);
+fetchData();
+</script>
+</body>
+</html>
