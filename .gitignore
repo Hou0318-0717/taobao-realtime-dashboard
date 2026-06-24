@@ -1,0 +1,13 @@
+# Logs
+logs/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Checkpoint (Structured Streaming)
+/tmp/ss_checkpoint
+
+# OS
+Thumbs.db
+.DS_Store
